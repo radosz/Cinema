@@ -2,12 +2,18 @@ import sqlite3
 from in_table import View
 
 show_all_movies_query = """SELECT * FROM Movies
+ORDER BY rating DESC
 """
 show_all_reservation = """SELECT * FROM Reservations
 """
 movie_id_query = """SELECT movie_id FROM Movies WHERE name = ?
 """
-projection_by_id = """SELECT Projections.projection_id,name,type,date,time
+projection_by_id_date = """SELECT movies.movie_id as id ,name as movie,rating,type,date,time
+FROM Movies
+JOIN projections ON movies.movie_id = projections.movie_id
+WHERE  movies.movie_id = ? AND date = ?
+"""
+projection_by_id_no_date = """SELECT movies.movie_id as id ,name as movie,rating,type,date,time
 FROM Movies
 JOIN projections ON movies.movie_id = projections.movie_id
 WHERE  movies.movie_id = ?
@@ -37,15 +43,12 @@ class Reservation:
             table.append([row["movie_id"], row["name"], row["rating"]])
         print(View(table, head))
 
-    # take string date  yyyy-mm-dd
-    def show_catalog(self, date):
-        q = self.cursor.execute(catalog_query, (date,))
+    def __get_table(self, query, head):
         table = []
-        head = ("id", "name", "rating", "type", "date", "time")
-        for row in q:
+        for row in query:
             rows = [row[x] for x in head]
             table.append(rows)
-        print(View(table,head))
+        print(View(table, head))
 
     def __get_table_row(self, query, row_key):
         rows = []
@@ -63,32 +66,22 @@ class Reservation:
         query = self.cursor.execute(movie_id_query, (name,))
         return self.__get_table_row(query, "movie_id")[0]
 
-    def get_projection_by_movie_id(self, movie_id):
-        q = self.cursor.execute(projection_by_id, (movie_id,))
-        name = self.__get_table_row(q, "name")[0]
-        q = self.cursor.execute(projection_by_id, (movie_id,))
-        type_m = self.__get_table_row(q, "type")[0]
-        q = self.cursor.execute(projection_by_id, (movie_id,))
-        date = self.__get_table_row(q, "date")[0]
-        q = self.cursor.execute(projection_by_id, (movie_id,))
-        time = self.__get_table_row(q, "time")[0]
-        q = self.cursor.execute(projection_by_id, (movie_id,))
-        prj_id = self.__get_table_row(q, "projection_id")[0]
-        return {
-            "id": prj_id,
-            "name": name,
-            "type": type_m,
-            "date": date,
-            "time": time
-        }
+    # take string date yyyy-mm-dd
+    def get_projection_by_movie_id(self, movie_id, date=False):
+        head = ("id", "movie", "rating", "type", "date", "time")
+        if not date:
+            q = self.cursor.execute(projection_by_id_no_date, (movie_id,))
+            return self.__get_table(q, head)
+        q = self.cursor.execute(projection_by_id_date, (movie_id, date))
+        return self.__get_table(q, head)
 
 
 def main():
     res = Reservation("cinema.db")
     res.show_movies()
     print(res.get_id_show_movie("The Hunger Games: Catching Fire"))
-    print(res.get_projection_by_movie_id(3))
-    res.show_catalog( '2014-04-01')
+    print(res.get_projection_by_movie_id(3, 2))
+    res.show_catalog('2014-04-01')
     try:
         res.make_reservation("vlado", 2, 3, 4)
     except sqlite3.IntegrityError:
