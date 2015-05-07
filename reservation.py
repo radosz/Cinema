@@ -11,7 +11,7 @@ movie_id_query = """SELECT movie_id FROM Movies WHERE name = ?
 projection_by_id_date = """SELECT movies.movie_id as id ,name as movie,rating,type,date,time
 FROM Movies
 JOIN projections ON movies.movie_id = projections.movie_id
-WHERE  movies.movie_id = ? AND date = ?
+WHERE  movies.movie_id = ? AND date LIKE ?
 """
 projection_by_id_no_date = """SELECT movies.movie_id as id ,name as movie,rating,type,date,time
 FROM Movies
@@ -36,12 +36,9 @@ class Reservation:
         self.cursor = self.conn.cursor()
 
     def show_movies(self):
-        r = self.cursor.execute(show_all_movies_query)
+        q = self.cursor.execute(show_all_movies_query)
         head = ["movie_id", "name", "rating"]
-        table = []
-        for row in r:
-            table.append([row["movie_id"], row["name"], row["rating"]])
-        print(View(table, head))
+        return self.__get_table(q, head)
 
     def __get_table(self, query, head):
         table = []
@@ -72,6 +69,7 @@ class Reservation:
         if not date:
             q = self.cursor.execute(projection_by_id_no_date, (movie_id,))
             return self.__get_table(q, head)
+        date = "%"+date+"%"
         q = self.cursor.execute(projection_by_id_date, (movie_id, date))
         return self.__get_table(q, head)
 
@@ -80,8 +78,7 @@ def main():
     res = Reservation("cinema.db")
     res.show_movies()
     print(res.get_id_show_movie("The Hunger Games: Catching Fire"))
-    print(res.get_projection_by_movie_id(3, 2))
-    res.show_catalog('2014-04-01')
+    print(res.get_projection_by_movie_id(3))
     try:
         res.make_reservation("vlado", 2, 3, 4)
     except sqlite3.IntegrityError:

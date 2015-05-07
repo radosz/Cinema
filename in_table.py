@@ -15,4 +15,4 @@ class View:
 
     def __make_table(self):
         table = self.table
-        return tabulate(table, headers=self.headers, tablefmt="fancy_grid")
+        return tabulate(table, headers=self.headers, tablefmt="rst")
