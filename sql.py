@@ -3,6 +3,9 @@ ORDER BY rating DESC
 """
 show_all_reservation = """SELECT * FROM Reservations
 """
+show_username_reservation = """SELECT reservation_id FROM Reservations
+WHERE username = ?
+"""
 movie_id_query = """SELECT movie_id FROM Movies WHERE name = ?
 """
 projection_by_id_date = """SELECT movies.movie_id as id ,name as movie,rating,type,date,time
@@ -22,4 +25,7 @@ catalog_query = """SELECT projection_id as id,name,rating,type,date,time
 FROM movies
 JOIN projections ON projection_id = movies.movie_id
 WHERE date = ?
+"""
+delete_reservation = """DELETE FROM reservations
+WHERE reservation_id = ?
 """
