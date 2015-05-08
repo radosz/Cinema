@@ -1,5 +1,5 @@
 import sqlite3
-from in_table import View
+from tabulate import tabulate
 
 show_all_movies_query = """SELECT * FROM Movies
 ORDER BY rating DESC
@@ -45,7 +45,7 @@ class Reservation:
         for row in query:
             rows = [row[x] for x in head]
             table.append(rows)
-        print(View(table, head))
+        print(tabulate(table, headers=head, tablefmt="rst"))
 
     def __get_table_row(self, query, row_key):
         rows = []
@@ -69,7 +69,7 @@ class Reservation:
         if not date:
             q = self.cursor.execute(projection_by_id_no_date, (movie_id,))
             return self.__get_table(q, head)
-        date = "%"+date+"%"
+        date = "%" + date + "%"
         q = self.cursor.execute(projection_by_id_date, (movie_id, date))
         return self.__get_table(q, head)
 
