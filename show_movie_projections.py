@@ -1,4 +1,4 @@
-from reservation import Reservation
+from magic_reservation_system import Reservation
 import sys
 
 res = Reservation("cinema.db")
