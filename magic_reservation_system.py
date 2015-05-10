@@ -82,6 +82,16 @@ class Reservation:
         output = "{} ({})".format(name, rating)
         return output
 
+    def load_reservation(self, id):
+        rows = []
+        cols = []
+        q = self.cursor.execute(sql.reservation_where_prj_id, (id,))
+        data = q.fetchall()
+        for element in data:
+            rows.append(element["row"])
+            cols.append(element["col"])
+        return (rows, cols)
+
     def get_date_time_types_by_id(self, id):
         q = self.cursor.execute(sql.projection, (id,))
         date = self.__get_table_row(q, "date")[0]
@@ -105,14 +115,13 @@ class Reservation_interface(Reservation):
         super().__init__(databasename)
         cn = cinema.Cinema("cinema_map.txt")
         row_s, col_s = self.get_reservation_rows()
-        for r, c in zip(row_s, col_s):
-            cn.load_reservations(r, c)
         all_tickets = cn.count_available_seats()
         username = input(res_m.messages1)
         self.show_movies()
         movie_id = input(res_m.messages3)
         self.get_projection_by_movie_id(movie_id)
         projection_id = input(res_m.messages4)
+        self.reservation_load(projection_id, cn)
         tickets_num = input(res_m.messages2)
         seat_tuples = []
         if int(tickets_num) <= all_tickets:
@@ -131,6 +140,11 @@ class Reservation_interface(Reservation):
             self.get_movie_name_rating_by_id(movie_id),
             self.get_date_time_types_by_id(projection_id),
             seat_tuples))
+
+    def reservation_load(self, projection_id, cn):
+        rows, cols = self.load_reservation(projection_id)
+        for r, c in zip(rows, cols):
+            cn.load_reservations(r, c)
 
     def choose(self, i):
         choose_o = input(res_m.messages5.format(i + 1) + ": ")

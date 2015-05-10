@@ -48,3 +48,7 @@ FROM Movies
 JOIN projections ON movies.movie_id = projections.movie_id
 WHERE  projection_id = ?
 """
+reservation_where_prj_id = """SELECT projection_id,row,col
+FROM Reservations
+WHERE projection_id = ?
+"""
