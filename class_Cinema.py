@@ -1,4 +1,5 @@
 class Cinema:
+
     def __init__(self, filename):
         lines = open(filename).read().split("\n")
         lines = [line for line in lines if line.strip() != 0]
@@ -19,15 +20,18 @@ class Cinema:
             print(ss)
 
     def is_available(self, row, col):
-        if self.seats_availability[(row, col*2)] == 1:
+        if self.seats_availability[(row, col * 2)] == 1:
             return False
         return True
 
     def choose_seat(self, row, col):
         if row > 10 or col > 10:
             return False
-        self.seats_availability[(row, col*2)] = 1
-        self.seats[row][col*2] = "X"
+        if self.is_available(row, col):
+            self.seats_availability[(row, col * 2)] = 1
+            self.seats[row][col * 2] = "X"
+        else:
+            raise SeatException("This seat is busy")
         return True
 
     def count_available_seats(self):
@@ -38,12 +42,10 @@ class Cinema:
                     count += 1
         return count
 
-mycinema = Cinema("cinema_map.txt")
-print(mycinema.seats_availability)
-mycinema.print_cinema()
-print(mycinema.is_available(2, 3))
-print(mycinema.is_available(4, 8))
-print(mycinema.choose_seat(1, 3))
-print(mycinema.count_available_seats())
-print("\n")
-mycinema.print_cinema()
+    def load_reservations(self, row, col):
+        self.choose_seat(row, col)
+        self.seats_availability[(row, col)] = 1
+
+
+class SeatException(Exception):
+    pass

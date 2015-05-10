@@ -12,8 +12,8 @@ CREATE TABLE Reservations
 (reservation_id INTEGER PRIMARY KEY,
     username TEXT,
     projection_id INTEGER,
-    row INTEGER unique,
-    col INTEGER unique,
+    row INTEGER,
+    col INTEGER,
     FOREIGN KEY(projection_id) REFERENCES Projections(projection_id)
 );
 CREATE TABLE Projections
